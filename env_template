@@ -1,0 +1,32 @@
+COMPOSE_PROJECT_NAME=hvcollector
+PLATFORM=linux/amd64
+
+# PostgreSQL Database (running in Docker container)
+# Note: Use 'postgres:5432' from containers, 'localhost:5431' from host
+POSTGRES_HOST=postgres
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD={{POSTGRES_PASSWORD}}
+POSTGRES_PORT=5432
+POSTGRES_DB=hypervisor
+POSTGRES_SCHEMA=fluentd
+
+# Hypervisor/SSH settings
+HYPERVISOR_HOST={{HYPERVISOR_HOST}}
+HYPERVISOR_USER={{HYPERVISOR_USER}}
+HYPERVISOR_PASSWORD={{HYPERVISOR_PASSWORD}}
+
+# Collector Settings
+CLUSTER_NAME={{CLUSTER_NAME}}
+KUBECONFIG=/kubeconfig
+KUBECTL_INSECURE_SKIP_TLS_VERIFY=false
+INTERVAL_SECONDS=60
+RUN_ONCE=false
+EXCLUDE_NAME_PREFIXES=cattle-
+EXCLUDE_NAMESPACE_PREFIXES=cattle-
+EXCLUDE_VOLUME_K8S_NAMESPACES=cattle-monitoring-system
+
+# Prometheus (promtool) - Cluster Metrics & VM metrics. Leave empty to disable.
+# Example: http://prometheus-operated.monitoring.svc.cluster.local:9090 (from inside cluster)
+PROMETHEUS_URL=http://127.0.0.1:9090
+# Optional: path to HTTP config for promtool auth (basic_auth, bearer_token, tls)
+PROMETHEUS_HTTP_CONFIG=

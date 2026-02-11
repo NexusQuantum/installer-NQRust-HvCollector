@@ -1,0 +1,78 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: hypervisor-postgres
+    env_file:
+      - .env
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER}" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - hvcollector-net
+
+  hypervisor-collector:
+    image: ghcr.io/nexusquantum/hypervisor-collector:latest
+    container_name: hypervisor-collector
+    depends_on:
+      postgres:
+        condition: service_healthy
+      prometheus-pf:
+        condition: service_started
+    env_file:
+      - .env
+    volumes:
+      - ./kubeconfig.yaml:/kubeconfig:ro
+    # Share network namespace with prometheus-pf so 127.0.0.1:9090 works
+    network_mode: "service:prometheus-pf"
+    restart: unless-stopped
+
+  # Keep Prometheus port-forward alive inside collector network namespace
+  # This makes http://127.0.0.1:9090 reachable from hypervisor-collector.
+  prometheus-pf:
+    image: bitnami/kubectl:latest
+    container_name: hypervisor-prometheus-pf
+    environment:
+      KUBECONFIG: /kubeconfig
+    volumes:
+      - ./kubeconfig.yaml:/kubeconfig:ro
+    entrypoint: [ "/bin/sh", "-lc" ]
+    command:
+      - "while true; do echo \"[prometheus-pf] starting port-forward to svc/rancher-monitoring-prometheus 9090:9090\"; kubectl -n cattle-monitoring-system port-forward svc/rancher-monitoring-prometheus 9090:9090; echo \"[prometheus-pf] port-forward exited; restarting in 2s...\"; sleep 2; done"
+    restart: unless-stopped
+    networks:
+      - hvcollector-net
+
+  fluentd:
+    build:
+      context: ./fluentd
+      dockerfile: Dockerfile
+    container_name: hypervisor-fluentd
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      FLUENTD_CONF: fluent.conf
+    ports:
+      - "24224:24224" # forward input
+      - "9880:9880" # http input
+    volumes:
+      - ./fluentd/fluent.conf:/fluentd/etc/fluent.conf:ro
+    restart: unless-stopped
+    networks:
+      - hvcollector-net
+
+volumes:
+  postgres_data:
+
+
+networks:
+  hvcollector-net:
+    driver: bridge

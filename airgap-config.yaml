@@ -1,0 +1,20 @@
+# Airgapped installation configuration for HV Collector
+compose_project_name: hvcollector
+
+# Docker images to bundle (pulled during airgapped binary build)
+images:
+  # Core HV Collector services (GHCR - requires authentication)
+  - ghcr.io/nexusquantum/hypervisor-collector:latest
+  - ghcr.io/nexusquantum/fluentd-hypervisor-collector:latest
+  
+  # Infrastructure (public images)
+  - postgres:15-alpine
+  - bitnami/kubectl:latest
+
+# Platform architecture
+platform: linux/amd64
+
+# Compression level (1-9, higher = smaller but slower)
+compression_level: 6
+
+# Expected bundle size: ~2GB (vs 3-4GB for hvcollector stack)

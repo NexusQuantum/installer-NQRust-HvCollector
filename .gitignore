@@ -1,0 +1,35 @@
+# Rust
+/target
+
+# Environment files
+.env
+.env.*
+config.yaml
+kubeconfig.yaml
+.ghcr_token
+/data
+
+# IDE
+.vscode/
+.idea/
+.cursor/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Database
+*.sqlite3
+*.db
+
+# Airgapped build artifacts (large files, do not push)
+/build/
+
+# Local backups
+backup*/
