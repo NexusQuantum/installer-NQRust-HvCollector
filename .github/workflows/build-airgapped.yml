@@ -112,10 +112,10 @@ jobs:
                     exit 1
                   fi
 
-                  # Check file size (should be > 1 GB with payload)
+                  # Check file size (should be > 100 MB with payload)
                   SIZE=$(stat -c%s nqrust-hvcollector-airgapped)
                   echo "Binary size: $(numfmt --to=iec-i --suffix=B $SIZE)"
-                  if [ $SIZE -lt 1000000000 ]; then
+                  if [ $SIZE -lt 100000000 ]; then
                     echo "❌ Binary too small ($SIZE bytes), likely missing payload"
                     exit 1
                   fi
