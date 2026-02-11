@@ -107,13 +107,13 @@ jobs:
                   echo "Validating airgapped binary..."
 
                   # Check file exists
-                  if [ ! -f nqrust-analytics-airgapped ]; then
+                  if [ ! -f nqrust-hvcollector-airgapped ]; then
                     echo "❌ Binary not found!"
                     exit 1
                   fi
 
                   # Check file size (should be > 1 GB with payload)
-                  SIZE=$(stat -c%s nqrust-analytics-airgapped)
+                  SIZE=$(stat -c%s nqrust-hvcollector-airgapped)
                   echo "Binary size: $(numfmt --to=iec-i --suffix=B $SIZE)"
                   if [ $SIZE -lt 1000000000 ]; then
                     echo "❌ Binary too small ($SIZE bytes), likely missing payload"
@@ -121,19 +121,19 @@ jobs:
                   fi
 
                   # Check payload marker exists
-                  if ! grep -q "__NQRUST_PAYLOAD__" nqrust-analytics-airgapped; then
+                  if ! grep -q "__NQRUST_PAYLOAD__" nqrust-hvcollector-airgapped; then
                     echo "❌ Payload marker not found in binary"
                     exit 1
                   fi
 
                   # Verify checksum file
-                  if [ ! -f nqrust-analytics-airgapped.sha256 ]; then
+                  if [ ! -f nqrust-hvcollector-airgapped.sha256 ]; then
                     echo "❌ Checksum file not found"
                     exit 1
                   fi
 
                   # Verify checksum
-                  if sha256sum -c nqrust-analytics-airgapped.sha256; then
+                  if sha256sum -c nqrust-hvcollector-airgapped.sha256; then
                     echo "✅ Checksum verification passed"
                   else
                     echo "❌ Checksum verification failed"
@@ -155,9 +155,9 @@ jobs:
 
                   Binary Details
                   ==============
-                  File: nqrust-analytics-airgapped
-                  Size: $(stat -c%s nqrust-analytics-airgapped | numfmt --to=iec-i --suffix=B)
-                  SHA256: $(cat nqrust-analytics-airgapped.sha256)
+                  File: nqrust-hvcollector-airgapped
+                  Size: $(stat -c%s nqrust-hvcollector-airgapped | numfmt --to=iec-i --suffix=B)
+                  SHA256: $(cat nqrust-hvcollector-airgapped.sha256)
 
                   Included Docker Images
                   ======================
@@ -165,10 +165,10 @@ jobs:
 
                   Installation
                   ============
-                  1. Download nqrust-analytics-airgapped
-                  2. Verify: sha256sum -c nqrust-analytics-airgapped.sha256
-                  3. Make executable: chmod +x nqrust-analytics-airgapped
-                  4. Run: ./nqrust-analytics-airgapped install
+                  1. Download nqrust-hvcollector-airgapped
+                  2. Verify: sha256sum -c nqrust-hvcollector-airgapped.sha256
+                  3. Make executable: chmod +x nqrust-hvcollector-airgapped
+                  4. Run: ./nqrust-hvcollector-airgapped install
 
                   For detailed instructions, see:
                   https://github.com/${{ github.repository }}/blob/main/docs/AIRGAPPED-INSTALLATION.md
@@ -179,8 +179,8 @@ jobs:
               uses: softprops/action-gh-release@v1
               with:
                   files: |
-                      nqrust-analytics-airgapped
-                      nqrust-analytics-airgapped.sha256
+                      nqrust-hvcollector-airgapped
+                      nqrust-hvcollector-airgapped.sha256
                       build-info.txt
                       build/images/manifest.json
               env:
@@ -191,8 +191,8 @@ jobs:
               with:
                   name: airgapped-binary-${{ github.ref_name }}-${{ github.sha }}
                   path: |
-                      nqrust-analytics-airgapped
-                      nqrust-analytics-airgapped.sha256
+                      nqrust-hvcollector-airgapped
+                      nqrust-hvcollector-airgapped.sha256
                       build-info.txt
                       build/images/manifest.json
                       build/images/SHA256SUMS
@@ -203,8 +203,8 @@ jobs:
                   echo "## 🎉 Airgapped Binary Build Complete" >> $GITHUB_STEP_SUMMARY
                   echo "" >> $GITHUB_STEP_SUMMARY
                   echo "### Build Information" >> $GITHUB_STEP_SUMMARY
-                  echo "- **Binary Size**: $(stat -c%s nqrust-analytics-airgapped | numfmt --to=iec-i --suffix=B)" >> $GITHUB_STEP_SUMMARY
-                  echo "- **SHA256**: \`$(cat nqrust-analytics-airgapped.sha256 | cut -d' ' -f1)\`" >> $GITHUB_STEP_SUMMARY
+                  echo "- **Binary Size**: $(stat -c%s nqrust-hvcollector-airgapped | numfmt --to=iec-i --suffix=B)" >> $GITHUB_STEP_SUMMARY
+                  echo "- **SHA256**: \`$(cat nqrust-hvcollector-airgapped.sha256 | cut -d' ' -f1)\`" >> $GITHUB_STEP_SUMMARY
                   echo "- **Git Commit**: \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
                   echo "" >> $GITHUB_STEP_SUMMARY
                   echo "### Included Images" >> $GITHUB_STEP_SUMMARY
