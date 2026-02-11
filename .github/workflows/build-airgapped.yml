@@ -71,7 +71,8 @@ jobs:
               with:
                   registry: ghcr.io
                   username: ${{ github.actor }}
-                  password: ${{ secrets.GITHUB_TOKEN }}
+                  # Use GHCR_TOKEN if available, otherwise fallback to GITHUB_TOKEN
+                  password: ${{ secrets.GHCR_TOKEN || secrets.GITHUB_TOKEN }}
 
             - name: Verify Docker authentication
               run: |
@@ -82,11 +83,14 @@ jobs:
 
                   # Test if we can access GHCR
                   if docker pull ghcr.io/${{ github.repository_owner }}/hypervisor-collector:latest 2>&1 | grep -q "denied"; then
-                    echo "❌ Authentication failed - GITHUB_TOKEN may not have access to packages"
-                    echo "⚠️  Please ensure:"
-                    echo "   1. Packages are public OR"
-                    echo "   2. Workflow has 'packages: read' permission OR"
-                    echo "   3. Use a PAT with 'read:packages' scope"
+                    echo "❌ Authentication failed - Access Denied to ghcr.io/${{ github.repository_owner }}/hypervisor-collector"
+                    echo ""
+                    echo "⚠️  HOW TO FIX THIS:"
+                    echo "1. Go to the Package settings for 'hypervisor-collector' in GitHub."
+                    echo "2. Under 'Manage Actions access', add this repository: '${{ github.repository }}'"
+                    echo "3. Grant 'Read' permissions."
+                    echo "--- OR ---"
+                    echo "4. Add a Repository Secret named 'GHCR_TOKEN' with a Personal Access Token (PAT) that has 'read:packages' scope."
                     exit 1
                   fi
                   echo "✅ Authentication successful"
