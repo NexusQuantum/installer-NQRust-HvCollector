@@ -70,7 +70,7 @@ jobs:
               uses: docker/login-action@v3
               with:
                   registry: ghcr.io
-                  username: ${{ github.repository_owner }}
+                  username: ${{ github.actor }}
                   password: ${{ secrets.GITHUB_TOKEN }}
 
             - name: Verify Docker authentication
@@ -81,7 +81,7 @@ jobs:
                   echo "Actor: ${{ github.actor }}"
 
                   # Test if we can access GHCR
-                  if docker pull ghcr.io/${{ github.repository_owner }}/analytics-engine:latest 2>&1 | grep -q "denied"; then
+                  if docker pull ghcr.io/${{ github.repository_owner }}/hypervisor-collector:latest 2>&1 | grep -q "denied"; then
                     echo "❌ Authentication failed - GITHUB_TOKEN may not have access to packages"
                     echo "⚠️  Please ensure:"
                     echo "   1. Packages are public OR"
