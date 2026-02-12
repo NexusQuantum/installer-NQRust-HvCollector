@@ -11,10 +11,9 @@ use std::{env, fs};
 use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
 use tokio::process::Command;
 
-
 use crate::ui::{
-    self, ConfirmationView, EnvSetupView, ErrorView, InstallingView,
-    RegistrySetupView, SuccessView, UpdateListView,
+    self, ConfirmationView, EnvSetupView, ErrorView, InstallingView, RegistrySetupView,
+    SuccessView, UpdateListView,
 };
 use crate::utils;
 
@@ -152,8 +151,9 @@ impl App {
                             MenuSelection::Proceed => {
                                 if self.env_exists && self.kubeconfig_exists {
                                     self.state = AppState::Installing;
-                                    self.logs
-                                        .push("🚀 Starting HV Collector installation...".to_string());
+                                    self.logs.push(
+                                        "🚀 Starting HV Collector installation...".to_string(),
+                                    );
 
                                     let result = self.run_docker_compose(&mut terminal).await;
 
@@ -180,7 +180,8 @@ impl App {
                                         "Authentication required to check for updates.".to_string(),
                                     );
                                     self.state = AppState::RegistrySetup;
-                                    self.registry_form.focus_state = crate::app::registry_form::FocusState::Field(0);
+                                    self.registry_form.focus_state =
+                                        crate::app::registry_form::FocusState::Field(0);
                                 } else {
                                     match self.load_updates().await {
                                         Ok(_) => {
@@ -200,7 +201,8 @@ impl App {
                                 self.registry_status = Some(
                                     "Update token and submit (Ctrl+S). Esc to cancel.".to_string(),
                                 );
-                                self.registry_form.focus_state = crate::app::registry_form::FocusState::Field(0);
+                                self.registry_form.focus_state =
+                                    crate::app::registry_form::FocusState::Field(0);
                                 self.registry_form.error_message.clear();
                                 self.registry_form.token =
                                     self.ghcr_token.clone().unwrap_or_default();
@@ -368,7 +370,7 @@ impl App {
 
     fn handle_registry_setup_events(&mut self) -> Result<Option<RegistryAction>> {
         use crate::app::registry_form::FocusState;
-        
+
         if event::poll(std::time::Duration::from_millis(100))? {
             if let Event::Key(key) = event::read()? {
                 if key.kind == KeyEventKind::Press {
@@ -401,17 +403,15 @@ impl App {
                                 FocusState::CancelButton => FocusState::SaveButton,
                             };
                         }
-                        KeyCode::Enter => {
-                            match &self.registry_form.focus_state {
-                                FocusState::SaveButton => {
-                                    return Ok(Some(RegistryAction::Submit));
-                                }
-                                FocusState::CancelButton => {
-                                    return Ok(Some(RegistryAction::Skip));
-                                }
-                                _ => {}
+                        KeyCode::Enter => match &self.registry_form.focus_state {
+                            FocusState::SaveButton => {
+                                return Ok(Some(RegistryAction::Submit));
                             }
-                        }
+                            FocusState::CancelButton => {
+                                return Ok(Some(RegistryAction::Skip));
+                            }
+                            _ => {}
+                        },
                         KeyCode::Esc => {
                             return Ok(Some(RegistryAction::Skip));
                         }
@@ -983,12 +983,12 @@ impl App {
 
     fn handle_form_events(&mut self) -> Result<Option<bool>> {
         use crate::app::form_data::FocusState;
-        
+
         if event::poll(std::time::Duration::from_millis(100))? {
             if let Event::Key(key) = event::read()? {
                 if key.kind == KeyEventKind::Press {
                     let total_fields = self.form_data.get_total_fields();
-                    
+
                     match key.code {
                         KeyCode::Up => {
                             self.form_data.focus_state = match &self.form_data.focus_state {
@@ -1000,7 +1000,9 @@ impl App {
                         }
                         KeyCode::Down => {
                             self.form_data.focus_state = match &self.form_data.focus_state {
-                                FocusState::Field(idx) if *idx < total_fields - 1 => FocusState::Field(idx + 1),
+                                FocusState::Field(idx) if *idx < total_fields - 1 => {
+                                    FocusState::Field(idx + 1)
+                                }
                                 FocusState::Field(_) => FocusState::SaveButton,
                                 FocusState::SaveButton => FocusState::CancelButton,
                                 _ => self.form_data.focus_state.clone(),
@@ -1008,7 +1010,9 @@ impl App {
                         }
                         KeyCode::Tab => {
                             self.form_data.focus_state = match &self.form_data.focus_state {
-                                FocusState::Field(idx) if *idx < total_fields - 1 => FocusState::Field(idx + 1),
+                                FocusState::Field(idx) if *idx < total_fields - 1 => {
+                                    FocusState::Field(idx + 1)
+                                }
                                 FocusState::Field(_) => FocusState::SaveButton,
                                 FocusState::SaveButton => FocusState::CancelButton,
                                 FocusState::CancelButton => FocusState::Field(0),
@@ -1022,19 +1026,17 @@ impl App {
                                 FocusState::CancelButton => FocusState::SaveButton,
                             };
                         }
-                        KeyCode::Enter => {
-                            match &self.form_data.focus_state {
-                                FocusState::SaveButton => {
-                                    if self.form_data.validate() {
-                                        return Ok(Some(true));
-                                    }
+                        KeyCode::Enter => match &self.form_data.focus_state {
+                            FocusState::SaveButton => {
+                                if self.form_data.validate() {
+                                    return Ok(Some(true));
                                 }
-                                FocusState::CancelButton => {
-                                    return Ok(Some(false));
-                                }
-                                _ => {}
                             }
-                        }
+                            FocusState::CancelButton => {
+                                return Ok(Some(false));
+                            }
+                            _ => {}
+                        },
                         KeyCode::Esc => {
                             return Ok(Some(false));
                         }
@@ -1066,15 +1068,19 @@ impl App {
 
         // Get template and replace placeholders with form data
         let mut env_content = utils::ENV_TEMPLATE.to_string();
-        
+
         // Replace PostgreSQL placeholders
-        env_content = env_content.replace("{{POSTGRES_PASSWORD}}", &self.form_data.postgres_password);
-        
+        env_content =
+            env_content.replace("{{POSTGRES_PASSWORD}}", &self.form_data.postgres_password);
+
         // Replace Hypervisor placeholders
         env_content = env_content.replace("{{HYPERVISOR_HOST}}", &self.form_data.hypervisor_host);
         env_content = env_content.replace("{{HYPERVISOR_USER}}", &self.form_data.hypervisor_user);
-        env_content = env_content.replace("{{HYPERVISOR_PASSWORD}}", &self.form_data.hypervisor_password);
-        
+        env_content = env_content.replace(
+            "{{HYPERVISOR_PASSWORD}}",
+            &self.form_data.hypervisor_password,
+        );
+
         // Replace Collector placeholders
         env_content = env_content.replace("{{CLUSTER_NAME}}", &self.form_data.cluster_name);
 

@@ -17,7 +17,7 @@ struct ServiceConfig {
 }
 
 const SERVICE_CONFIGS: &[ServiceConfig] = &[
-   ServiceConfig {
+    ServiceConfig {
         display_name: "Hypervisor Collector",
         image: "ghcr.io/nexusquantum/hypervisor-collector",
         package: "hypervisor-collector",
@@ -240,7 +240,7 @@ async fn fetch_installer_update(client: &Client) -> Result<Option<UpdateInfo>> {
 
 fn apply_remote_versions(info: &mut UpdateInfo, versions: Vec<PackageVersion>) {
     let mut tags = Vec::new();
-   let mut seen = HashSet::new();
+    let mut seen = HashSet::new();
     let mut tag_dates: HashMap<String, DateTime<Utc>> = HashMap::new();
 
     for version in versions {

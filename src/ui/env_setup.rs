@@ -43,7 +43,7 @@ pub fn render_env_setup(frame: &mut Frame, view: &EnvSetupView<'_>) {
     frame.render_widget(title, chunks[0]);
 
     let mut form_lines = vec![];
-    
+
     // Helper function to render a field
     let render_field = |idx: usize| -> Line {
         let is_focused = matches!(&data.focus_state, FocusState::Field(i) if *i == idx);
@@ -57,7 +57,7 @@ pub fn render_env_setup(frame: &mut Frame, view: &EnvSetupView<'_>) {
         };
 
         let label = data.get_field_label(idx);
-        
+
         // Get the appropriate field value based on index
         let value = match idx {
             0 => &data.postgres_host,
@@ -74,10 +74,10 @@ pub fn render_env_setup(frame: &mut Frame, view: &EnvSetupView<'_>) {
             11 => &data.prometheus_url,
             _ => &data.postgres_host,
         };
-        
+
         let is_password = data.is_password_field(idx);
         let is_required = data.is_field_required(idx);
-        
+
         let display_value = if is_password && !value.is_empty() {
             "*".repeat(value.len())
         } else if value.is_empty() {
@@ -85,7 +85,7 @@ pub fn render_env_setup(frame: &mut Frame, view: &EnvSetupView<'_>) {
         } else {
             value.clone()
         };
-        
+
         let cursor = if is_focused { "▶" } else { " " };
         let required_mark = if is_required { " *" } else { "" };
 
@@ -101,7 +101,9 @@ pub fn render_env_setup(frame: &mut Frame, view: &EnvSetupView<'_>) {
     // PostgreSQL Section
     form_lines.push(Line::from(Span::styled(
         "━━━ PostgreSQL Database ━━━",
-        Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD),
+        Style::default()
+            .fg(Color::Cyan)
+            .add_modifier(Modifier::BOLD),
     )));
     form_lines.push(Line::from(""));
     for i in 0..6 {
@@ -112,7 +114,9 @@ pub fn render_env_setup(frame: &mut Frame, view: &EnvSetupView<'_>) {
     // Hypervisor Section
     form_lines.push(Line::from(Span::styled(
         "━━━ Hypervisor/SSH Settings ━━━",
-        Style::default().fg(Color::Magenta).add_modifier(Modifier::BOLD),
+        Style::default()
+            .fg(Color::Magenta)
+            .add_modifier(Modifier::BOLD),
     )));
     form_lines.push(Line::from(""));
     for i in 6..9 {
@@ -123,7 +127,9 @@ pub fn render_env_setup(frame: &mut Frame, view: &EnvSetupView<'_>) {
     // Collector Section
     form_lines.push(Line::from(Span::styled(
         "━━━ Collector Settings ━━━",
-        Style::default().fg(Color::Green).add_modifier(Modifier::BOLD),
+        Style::default()
+            .fg(Color::Green)
+            .add_modifier(Modifier::BOLD),
     )));
     form_lines.push(Line::from(""));
     for i in 9..12 {
@@ -173,9 +179,7 @@ pub fn render_env_setup(frame: &mut Frame, view: &EnvSetupView<'_>) {
             .bg(Color::Red)
             .add_modifier(Modifier::BOLD)
     } else {
-        Style::default()
-            .fg(Color::Red)
-            .add_modifier(Modifier::BOLD)
+        Style::default().fg(Color::Red).add_modifier(Modifier::BOLD)
     };
 
     let button_line = Line::from(vec![
@@ -184,7 +188,10 @@ pub fn render_env_setup(frame: &mut Frame, view: &EnvSetupView<'_>) {
         Span::raw("  "),
         Span::styled(" Cancel ", cancel_style),
         Span::raw("  "),
-        Span::styled("↑↓ Tab to navigate | Type to edit", Style::default().fg(Color::DarkGray)),
+        Span::styled(
+            "↑↓ Tab to navigate | Type to edit",
+            Style::default().fg(Color::DarkGray),
+        ),
     ]);
 
     let buttons = Paragraph::new(button_line).centered();

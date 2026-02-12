@@ -14,17 +14,17 @@ pub struct FormData {
     pub(crate) postgres_port: String,
     pub(crate) postgres_db: String,
     pub(crate) postgres_schema: String,
-    
+
     // Hypervisor/SSH settings
     pub(crate) hypervisor_host: String,
     pub(crate) hypervisor_user: String,
     pub(crate) hypervisor_password: String,
-    
+
     // Collector settings (optional, has defaults)
     pub(crate) cluster_name: String,
     pub(crate) interval_seconds: String,
     pub(crate) prometheus_url: String,
-    
+
     pub(crate) focus_state: FocusState,
     pub(crate) error_message: String,
 }
@@ -39,17 +39,17 @@ impl FormData {
             postgres_port: "5432".to_string(),
             postgres_db: "hypervisor".to_string(),
             postgres_schema: "fluentd".to_string(),
-            
+
             // Hypervisor defaults
             hypervisor_host: String::new(),
             hypervisor_user: String::new(),
             hypervisor_password: String::new(),
-            
+
             // Collector defaults
             cluster_name: "harvester".to_string(),
             interval_seconds: "60".to_string(),
             prometheus_url: "http://127.0.0.1:9090".to_string(),
-            
+
             focus_state: FocusState::Field(0),
             error_message: String::new(),
         }
@@ -61,17 +61,17 @@ impl FormData {
             self.error_message = "PostgreSQL Host is required!".to_string();
             return false;
         }
-        
+
         if self.postgres_password.trim().is_empty() {
             self.error_message = "PostgreSQL Password is required!".to_string();
             return false;
         }
-        
+
         if self.hypervisor_host.trim().is_empty() {
             self.error_message = "Hypervisor Host is required!".to_string();
             return false;
         }
-        
+
         if self.hypervisor_password.trim().is_empty() {
             self.error_message = "Hypervisor Password is required!".to_string();
             return false;
@@ -117,7 +117,7 @@ impl FormData {
     pub fn get_total_fields(&self) -> usize {
         12 // All fields
     }
-    
+
     pub fn get_field_label(&self, idx: usize) -> &str {
         match idx {
             0 => "PostgreSQL Host",
@@ -135,12 +135,12 @@ impl FormData {
             _ => "Unknown",
         }
     }
-    
+
     pub fn is_field_required(&self, idx: usize) -> bool {
         // Required fields: 0, 2, 6, 8 (postgres host/pass, hypervisor host/pass)
         matches!(idx, 0 | 2 | 6 | 8)
     }
-    
+
     pub fn is_password_field(&self, idx: usize) -> bool {
         matches!(idx, 2 | 8) // postgres_password, hypervisor_password
     }
