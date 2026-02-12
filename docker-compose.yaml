@@ -51,9 +51,7 @@ services:
       - hvcollector-net
 
   fluentd:
-    build:
-      context: ./fluentd
-      dockerfile: Dockerfile
+    image: ghcr.io/nexusquantum/fluentd-hypervisor-collector:latest
     container_name: hypervisor-fluentd
     depends_on:
       postgres:
@@ -63,8 +61,6 @@ services:
     ports:
       - "24224:24224" # forward input
       - "9880:9880" # http input
-    volumes:
-      - ./fluentd/fluent.conf:/fluentd/etc/fluent.conf:ro
     restart: unless-stopped
     networks:
       - hvcollector-net
