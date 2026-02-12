@@ -71,13 +71,8 @@ pub fn ensure_compose_bundle(root: &Path) -> Result<()> {
         fs::write(&compose_path, COMPOSE_TEMPLATE)?;
     }
 
-    // Fluentd build context
-    let fluentd_dir = root.join("fluentd");
-    fs::create_dir_all(&fluentd_dir)?;
-
-    // Write fluentd config files
-    crate::templates::write_fluentd_config(root)?;
-    crate::templates::write_fluentd_dockerfile(root)?;
+    // Fluentd config now comes from GHCR image - no local files needed
+    // See: ghcr.io/nexusquantum/fluentd-hypervisor-collector:latest
 
     Ok(())
 }
