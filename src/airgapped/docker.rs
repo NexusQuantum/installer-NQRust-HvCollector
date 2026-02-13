@@ -15,10 +15,7 @@ const REQUIRED_IMAGES: &[(&str, &str)] = &[
         "ghcr.io/nexusquantum/hypervisor-collector:latest",
         "hypervisor-collector.tar.gz",
     ),
-    (
-        "bitnami/kubectl:latest",
-        "kubectl.tar.gz",
-    ),
+    ("bitnami/kubectl:latest", "kubectl.tar.gz"),
     (
         "ghcr.io/nexusquantum/fluentd-hypervisor-collector:latest",
         "fluentd-hypervisor-collector.tar.gz",
