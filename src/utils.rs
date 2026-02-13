@@ -7,48 +7,34 @@ pub const ENV_TEMPLATE: &str = include_str!("../env_template");
 pub const COMPOSE_TEMPLATE: &str = include_str!("../docker-compose.yaml");
 
 pub fn find_file(filename: &str) -> bool {
+    // First check current working directory (where user runs the installer)
+    let cwd = std::env::current_dir().unwrap_or_else(|_| PathBuf::from("."));
+    if cwd.join(filename).exists() {
+        return true;
+    }
+
+    // Fallback: check project_root() for backward compatibility
     let root = project_root();
     root.join(filename).exists()
 }
 
 pub fn project_root() -> PathBuf {
-    let start = std::env::current_dir().unwrap_or_else(|_| PathBuf::from("."));
+    // In production/airgapped mode, project root is CWD
+    let cwd = std::env::current_dir().unwrap_or_else(|_| PathBuf::from("."));
 
-    // Walk up to find a directory that contains either docker-compose files or Cargo.toml
-    let candidates = [
-        "docker-compose.yml",
-        "docker-compose.yaml",
-        "compose.yml",
-        "compose.yaml",
-        "Cargo.toml",
-    ];
-
-    let mut current = start.as_path();
-    while let Some(dir) = current.parent().or_else(|| Some(current)) {
-        if candidates.iter().any(|name| dir.join(name).exists()) {
-            return dir.to_path_buf();
-        }
-
-        // If we've reached filesystem root, stop
-        if dir.parent().is_none() {
-            break;
-        }
-
-        current = dir.parent().unwrap_or(dir);
-    }
-
-    // Fallback: if running from target/*/ build dirs, hop two parents as before
-    if start
-        .to_str()
-        .map(|s| s.contains("target"))
-        .unwrap_or(false)
-    {
-        if let Some(parent) = start.parent().and_then(|p| p.parent()) {
-            return parent.to_path_buf();
+    // Only do complex lookup if running from development (target/ directory)
+    if cwd.to_str().map(|s| s.contains("target")).unwrap_or(false) {
+        // Walk up to find Cargo.toml for development
+        let mut current = cwd.as_path();
+        while let Some(parent) = current.parent() {
+            if parent.join("Cargo.toml").exists() {
+                return parent.to_path_buf();
+            }
+            current = parent;
         }
     }
 
-    start
+    cwd
 }
 
 pub fn ensure_compose_bundle(root: &Path) -> Result<()> {
@@ -82,19 +68,20 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_find_file_exists() {
-        // Cargo.toml is known to exist in the project root
+    fn test_find_file_in_cwd() {
+        // Test that find_file checks CWD first
+        // This test assumes it runs from project root where Cargo.toml exists
         assert!(
             find_file("Cargo.toml"),
-            "Should find Cargo.toml in project root"
+            "Should find Cargo.toml in CWD or project root"
         );
     }
 
     #[test]
-    fn test_find_file_not_exists() {
-        // This file should not exist
+    fn test_find_file_not_exists_in_cwd() {
+        // This file should not exist in CWD or project root
         assert!(
-            !find_file("non_existent_file_xyz"),
+            !find_file("definitely_does_not_exist_12345.txt"),
             "Should not find non-existent file"
         );
     }
