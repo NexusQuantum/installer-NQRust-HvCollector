@@ -8,28 +8,21 @@ use std::io;
 use std::path::Path;
 use std::process::{Command, Stdio};
 
-/// List of required Docker images (must match save-images.sh)
-/// busybox is used by bootstrap service (Dockerfile: FROM busybox) so compose build does not pull
+/// List of required Docker images for HV Collector (must match save-images.sh)
 const REQUIRED_IMAGES: &[(&str, &str)] = &[
-    ("busybox:latest", "busybox.tar.gz"),
+    ("postgres:15-alpine", "postgres.tar.gz"),
     (
-        "ghcr.io/nexusquantum/analytics-engine:latest",
-        "analytics-engine.tar.gz",
+        "ghcr.io/nexusquantum/hypervisor-collector:latest",
+        "hypervisor-collector.tar.gz",
     ),
     (
-        "ghcr.io/nexusquantum/analytics-engine-ibis:latest",
-        "analytics-engine-ibis.tar.gz",
+        "bitnami/kubectl:latest",
+        "kubectl.tar.gz",
     ),
     (
-        "ghcr.io/nexusquantum/analytics-service:latest",
-        "analytics-service.tar.gz",
+        "ghcr.io/nexusquantum/fluentd-hypervisor-collector:latest",
+        "fluentd-hypervisor-collector.tar.gz",
     ),
-    (
-        "ghcr.io/nexusquantum/analytics-ui:latest",
-        "analytics-ui.tar.gz",
-    ),
-    ("qdrant/qdrant:v1.11.0", "qdrant.tar.gz"),
-    ("postgres:15", "postgres.tar.gz"),
 ];
 
 /// Check if Docker is available

@@ -47,11 +47,10 @@ mkdir -p "${IMAGES_DIR}"
 # Define images to save
 # Format: "image_name:tag|output_filename"
 declare -a IMAGES=(
-    "busybox:latest|busybox.tar.gz"
-    "ghcr.io/nexusquantum/hypervisor-collector:latest|hypervisor-collector.tar.gz"
-    "ghcr.io/nexusquantum/fluentd-hypervisor-collector:latest|fluentd-hypervisor-collector.tar.gz"
     "postgres:15-alpine|postgres.tar.gz"
+    "ghcr.io/nexusquantum/hypervisor-collector:latest|hypervisor-collector.tar.gz"
     "bitnami/kubectl:latest|kubectl.tar.gz"
+    "ghcr.io/nexusquantum/fluentd-hypervisor-collector:latest|fluentd-hypervisor-collector.tar.gz"
 )
 
 # Pull and save each image
