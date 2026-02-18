@@ -17,9 +17,9 @@ pub fn is_airgapped_binary() -> Result<bool> {
     }
     let exe_path = std::env::current_exe()?;
     let file_size = std::fs::metadata(&exe_path)?.len();
-    // If binary is larger than expected (~50 MB threshold), likely has payload
+    // If binary is larger than expected (~100 MB threshold), likely has payload
     // Normal binary is ~10 MB, with payload it's 2.5+ GB
-    if file_size > 50_000_000 {
+    if file_size > 100_000_000 {
         extractor::has_payload_marker(&exe_path)
     } else {
         Ok(false)
