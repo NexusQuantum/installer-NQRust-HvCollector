@@ -29,6 +29,12 @@ const SERVICE_CONFIGS: &[ServiceConfig] = &[
         package: "fluentd-hypervisor-collector",
         current_tag: "latest",
     },
+    ServiceConfig {
+        display_name: "Postgres (HV Collector)",
+        image: "ghcr.io/nexusquantum/postgres-hypervisor-collector",
+        package: "postgres-hypervisor-collector",
+        current_tag: "latest",
+    },
 ];
 
 #[derive(Debug, Clone)]

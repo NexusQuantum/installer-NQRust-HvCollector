@@ -8,7 +8,7 @@ images:
   - ghcr.io/nexusquantum/fluentd-hypervisor-collector:latest
   
   # Infrastructure (public images)
-  - postgres:15-alpine
+  - ghcr.io/nexusquantum/postgres-hypervisor-collector:latest
   - bitnami/kubectl:latest
 
 # Platform architecture

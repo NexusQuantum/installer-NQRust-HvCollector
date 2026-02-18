@@ -1,50 +1,50 @@
 # Database Schema Management
 
-## Current Approach: Manual Sync
+## Current Approach: Schema Baked into Postgres Image
 
-The database schema is defined in `init-db.sql` and must be manually synchronized with the HV Collector codebase.
+The database schema is defined in `postgres/init.sql` inside the
+[hypervisor-collector](https://github.com/NexusQuantum/hypervisor-collector) repo
+and is **baked into the `postgres-hypervisor-collector` Docker image** at build time.
+
+> **No manual `init-db.sql` sync is needed in this installer.**
+> The schema is automatically applied when the postgres container starts for the first time.
 
 ### Schema Source
-- **Reference**: `reference/hypervisor-collector/models.py`
-- **Implementation**: `init-db.sql`
-- **Last Sync**: 2026-02-11
 
-### Tables Included
-1. `fluentd.logs` - Container/systemd logs
-2. `hypervisor_inventory` - VMs, Volumes, Images, Networks
-3. `hypervisor_node_usage` - Node CPU/Memory
-4. `hypervisor_pod_usage` - Pod CPU/Memory  
-5. `hypervisor_collector_status` - Health check
-6. `hypervisor_dashboard_summary` - Dashboard counts
-7. `hypervisor_capacity` - Capacity metrics
-8. `hypervisor_events` - Kubernetes events
-9. `hypervisor_cluster_metrics` - Prometheus cluster metrics
-10. `hypervisor_vm_metrics` - Prometheus VM metrics
+- **Reference**: `hypervisor-collector/models.py` (SQLAlchemy models)
+- **Implementation**: `hypervisor-collector/postgres/init.sql` (baked into image)
+- **Image**: `ghcr.io/nexusquantum/postgres-hypervisor-collector:latest`
+- **Last updated**: 2026-02-18
+
+### Tables (all in `fluentd` schema)
+
+1. `fluentd.logs` — Container/systemd logs
+2. `fluentd.hypervisor_inventory` — VMs, Volumes, Images, Networks
+3. `fluentd.hypervisor_node_usage` — Node CPU/Memory
+4. `fluentd.hypervisor_pod_usage` — Pod CPU/Memory
+5. `fluentd.hypervisor_collector_status` — Health check
+6. `fluentd.hypervisor_dashboard_summary` — Dashboard counts
+7. `fluentd.hypervisor_capacity` — Capacity metrics
+8. `fluentd.hypervisor_events` — Kubernetes events
+9. `fluentd.hypervisor_cluster_metrics` — Prometheus cluster metrics
+10. `fluentd.hypervisor_vm_metrics` — Prometheus VM metrics
 
 ### Update Procedure
 
-When `reference/hypervisor-collector/models.py` changes:
+When `models.py` changes in the hypervisor-collector repo:
 
-1. **Review changes** in models.py
-2. **Update init-db.sql** with new/changed tables
-3. **Update "Last Sync" date** in this file and init-db.sql header
-4. **Test** with fresh database:
+1. **Update** `hypervisor-collector/postgres/init.sql` with new/changed tables
+2. **Push** to `main` branch → CI/CD automatically rebuilds and pushes `postgres-hypervisor-collector:latest`
+3. **Pull** the new image on the target server:
    ```bash
-   docker compose -p hvcollector down -v
-   docker compose -p hvcollector up -d
-   docker exec -it hypervisor-postgres psql -U postgres -d hypervisor -c "\dt; \dt fluentd.*"
+   docker compose pull postgres
+   docker compose down -v   # ⚠️ drops existing data
+   docker compose up -d
    ```
-
-### Future Improvement
-
-For production-grade deployments, consider:
-- Moving migrations into the `hypervisor-collector` container
-- Using Alembic `upgrade head` on container startup
-- Automatic schema sync with code changes
 
 ### Manual Migration for Existing Installations
 
-If schema changes after initial installation:
+If schema changes after initial installation (to avoid data loss):
 
 ```bash
 # Connect to database
@@ -52,5 +52,11 @@ docker exec -it hypervisor-postgres psql -U postgres -d hypervisor
 
 # Run ALTER TABLE statements manually
 # Example:
-ALTER TABLE hypervisor_inventory ADD COLUMN new_field VARCHAR(255);
+ALTER TABLE fluentd.hypervisor_inventory ADD COLUMN new_field VARCHAR(255);
+```
+
+### Verify Schema
+
+```bash
+docker exec hypervisor-postgres psql -U postgres -d hypervisor -c "\dt fluentd.*"
 ```
