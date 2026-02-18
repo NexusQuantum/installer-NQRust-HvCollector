@@ -186,7 +186,9 @@ jobs:
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+            # Upload only on release or manual run to avoid hitting artifact storage quota
             - name: Upload build artifacts
+              if: github.event_name == 'release' || github.event_name == 'workflow_dispatch'
               uses: actions/upload-artifact@v4
               with:
                   name: airgapped-binary-${{ github.ref_name }}-${{ github.sha }}
@@ -196,7 +198,7 @@ jobs:
                       build-info.txt
                       build/images/manifest.json
                       build/images/SHA256SUMS
-                  retention-days: 30
+                  retention-days: 7
 
             - name: Summary
               run: |
