@@ -1071,7 +1071,7 @@ impl App {
 
         // Replace PostgreSQL placeholders
         env_content =
-        env_content.replace("{{POSTGRES_PASSWORD}}", &self.form_data.postgres_password);
+            env_content.replace("{{POSTGRES_PASSWORD}}", &self.form_data.postgres_password);
         env_content = env_content.replace("{{POSTGRES_PORT}}", &self.form_data.postgres_port);
 
         // Replace Hypervisor placeholders
@@ -1083,7 +1083,8 @@ impl App {
         );
 
         // Replace Collector placeholders
-        env_content = env_content.replace("{{LOG_RETENTION_DAYS}}", &self.form_data.log_retention_days);
+        env_content =
+            env_content.replace("{{LOG_RETENTION_DAYS}}", &self.form_data.log_retention_days);
 
         fs::write(env_path, env_content)?;
         Ok(())
