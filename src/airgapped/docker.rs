@@ -11,8 +11,8 @@ use std::process::{Command, Stdio};
 /// List of required Docker images for HV Collector (must match save-images.sh)
 const REQUIRED_IMAGES: &[(&str, &str)] = &[
     (
-        "ghcr.io/nexusquantum/postgres-hypervisor-collector:latest",
-        "postgres-hypervisor-collector.tar.gz",
+        "postgres:15-alpine",
+        "postgres.tar.gz",
     ),
     (
         "ghcr.io/nexusquantum/hypervisor-collector:latest",
