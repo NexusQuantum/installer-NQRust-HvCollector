@@ -21,9 +21,9 @@ pub struct FormData {
     pub(crate) hypervisor_password: String,
 
     // Collector settings (optional, has defaults)
-    pub(crate) cluster_name: String,
     pub(crate) interval_seconds: String,
     pub(crate) prometheus_url: String,
+    pub(crate) log_retention_days: String,
 
     pub(crate) focus_state: FocusState,
     pub(crate) error_message: String,
@@ -36,7 +36,7 @@ impl FormData {
             postgres_host: "postgres".to_string(),
             postgres_user: "postgres".to_string(),
             postgres_password: String::new(),
-            postgres_port: "5432".to_string(),
+            postgres_port: String::new(),
             postgres_db: "hypervisor".to_string(),
             postgres_schema: "fluentd".to_string(),
 
@@ -46,9 +46,9 @@ impl FormData {
             hypervisor_password: String::new(),
 
             // Collector defaults
-            cluster_name: "harvester".to_string(),
             interval_seconds: "60".to_string(),
             prometheus_url: "http://127.0.0.1:9090".to_string(),
+            log_retention_days: "365".to_string(),
 
             focus_state: FocusState::Field(0),
             error_message: String::new(),
@@ -105,9 +105,9 @@ impl FormData {
                 6 => &mut self.hypervisor_host,
                 7 => &mut self.hypervisor_user,
                 8 => &mut self.hypervisor_password,
-                9 => &mut self.cluster_name,
-                10 => &mut self.interval_seconds,
-                11 => &mut self.prometheus_url,
+                9 => &mut self.interval_seconds,
+                10 => &mut self.prometheus_url,
+                11 => &mut self.log_retention_days,
                 _ => &mut self.postgres_host,
             },
             _ => &mut self.postgres_host,
@@ -129,9 +129,9 @@ impl FormData {
             6 => "Hypervisor Host",
             7 => "Hypervisor User",
             8 => "Hypervisor Password",
-            9 => "Cluster Name",
-            10 => "Interval Seconds",
-            11 => "Prometheus URL (optional)",
+            9 => "Interval Seconds",
+            10 => "Prometheus URL (optional)",
+            11 => "Log Retention Days",
             _ => "Unknown",
         }
     }
