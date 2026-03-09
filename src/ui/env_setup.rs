@@ -72,6 +72,7 @@ pub fn render_env_setup(frame: &mut Frame, view: &EnvSetupView<'_>) {
             9 => &data.interval_seconds,
             10 => &data.prometheus_url,
             11 => &data.log_retention_days,
+            12 => &data.data_retention_days,
             _ => &data.postgres_host,
         };
 
@@ -132,7 +133,7 @@ pub fn render_env_setup(frame: &mut Frame, view: &EnvSetupView<'_>) {
             .add_modifier(Modifier::BOLD),
     )));
     form_lines.push(Line::from(""));
-    for i in 9..12 {
+    for i in 9..13 {
         form_lines.push(render_field(i));
     }
     form_lines.push(Line::from(""));

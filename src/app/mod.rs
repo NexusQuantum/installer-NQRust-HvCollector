@@ -1085,6 +1085,10 @@ impl App {
         // Replace Collector placeholders
         env_content =
             env_content.replace("{{LOG_RETENTION_DAYS}}", &self.form_data.log_retention_days);
+        env_content = env_content.replace(
+            "{{DATA_RETENTION_DAYS}}",
+            &self.form_data.data_retention_days,
+        );
 
         fs::write(env_path, env_content)?;
         Ok(())

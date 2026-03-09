@@ -24,6 +24,7 @@ pub struct FormData {
     pub(crate) interval_seconds: String,
     pub(crate) prometheus_url: String,
     pub(crate) log_retention_days: String,
+    pub(crate) data_retention_days: String,
 
     pub(crate) focus_state: FocusState,
     pub(crate) error_message: String,
@@ -49,6 +50,7 @@ impl FormData {
             interval_seconds: "60".to_string(),
             prometheus_url: "http://127.0.0.1:9090".to_string(),
             log_retention_days: "365".to_string(),
+            data_retention_days: "30".to_string(),
 
             focus_state: FocusState::Field(0),
             error_message: String::new(),
@@ -108,6 +110,7 @@ impl FormData {
                 9 => &mut self.interval_seconds,
                 10 => &mut self.prometheus_url,
                 11 => &mut self.log_retention_days,
+                12 => &mut self.data_retention_days,
                 _ => &mut self.postgres_host,
             },
             _ => &mut self.postgres_host,
@@ -115,7 +118,7 @@ impl FormData {
     }
 
     pub fn get_total_fields(&self) -> usize {
-        12 // All fields
+        13 // All fields
     }
 
     pub fn get_field_label(&self, idx: usize) -> &str {
@@ -132,6 +135,7 @@ impl FormData {
             9 => "Interval Seconds",
             10 => "Prometheus URL (optional)",
             11 => "Log Retention Days",
+            12 => "Data Retention Days",
             _ => "Unknown",
         }
     }
