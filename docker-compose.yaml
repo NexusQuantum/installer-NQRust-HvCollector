@@ -11,6 +11,8 @@ services:
       - "${POSTGRES_PORT}:${POSTGRES_PORT}"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    # Default Docker shm is 64MB; large VACUUM can fail with "could not resize shared memory ... No space left on device"
+    shm_size: "512mb"
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -p ${POSTGRES_PORT}" ]
       interval: 5s
