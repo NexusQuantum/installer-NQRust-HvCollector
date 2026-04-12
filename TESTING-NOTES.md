@@ -6,32 +6,31 @@
 **Prerequisites:**
 - Docker + Docker Compose v2
 - Valid kubeconfig.yaml
-- GitHub PAT with read:packages
+- GitHub PAT with `read:packages` scope
 
 **Steps:**
 1. Place `kubeconfig.yaml` in project directory
-2. Run `./target/release/nqrust-hvcollector install`
-3. Authenticate with GitHub PAT
+2. Run `./target/release/nqrust-hvcollector`
+3. Authenticate with GitHub PAT when prompted (can skip if airgapped)
 4. Fill in form:
-   - PostgreSQL: host, user, password, port (5431), db, schema
-   - Hypervisor: host, user, password
-   - Collector: cluster name, interval
+   - PostgreSQL: host (`postgres`), user (`postgres`), password, port, db (`hypervisor`), schema (`fluentd`)
+   - Hypervisor/SSH: host, user, password
+   - Collector: interval (default: 60s), Prometheus URL (optional), retention days
 5. Proceed with installation
 
 **Expected:**
 - `.env` file created with correct values
-- Docker Compose builds Fluentd image
 - All 4 services start:
-  - postgres (port 5431)
-  - hypervisor-collector
-  - prometheus-pf
-  - fluentd (ports 24224, 9880)
+  - `hypervisor-postgres` (PostgreSQL 15)
+  - `hypervisor-collector`
+  - `hypervisor-prometheus-pf`
+  - `hypervisor-fluentd` (ports 24224, 9880)
 
 **Verification:**
 ```bash
 docker compose -p hvcollector ps
 docker compose -p hvcollector logs hypervisor-collector
-psql -h localhost -p 5431 -U postgres -d hypervisor
+docker exec -it hypervisor-postgres psql -U postgres -d hypervisor
 ```
 
 ### 2. Airgapped Installation
@@ -41,45 +40,53 @@ psql -h localhost -p 5431 -U postgres -d hypervisor
 ```
 
 **Expected output:**
-- `nqrust-hvcollector-airgapped` binary (~2 GB)
-- Contains all 4 Docker images embedded
+- `nqrust-hvcollector-airgapped` binary (~400 MB)
+- Contains all 4 Docker images embedded:
+  - `postgres:15-alpine`
+  - `ghcr.io/nexusquantum/hypervisor-collector:latest`
+  - `bitnami/kubectl:latest`
+  - `ghcr.io/nexusquantum/fluentd-hypervisor-collector:latest`
 
-**Install (airgapped machine):**
-1. Transfer binary to isolated machine
-2. Run `./nqrust-hvcollector-airgapped install`
-3. Verify images load from embedded payload
-4. Complete TUI flow as in scenario 1
+**Install (target machine):**
+1. Transfer binary and `kubeconfig.yaml` to target machine
+2. `chmod +x nqrust-hvcollector-airgapped`
+3. `./nqrust-hvcollector-airgapped`
+4. Images auto-load from embedded payload, then TUI installer starts
+5. Complete TUI flow as in scenario 1
 
 **Verification:**
 ```bash
 docker images | grep -E "postgres|kubectl|hypervisor-collector|fluentd"
+docker compose -p hvcollector ps
 ```
 
 ### 3. Configuration Validation
 **Test invalid inputs:**
 - Empty PostgreSQL host → Error: "PostgreSQL Host is required!"
 - Invalid port (abc) → Error: "PostgreSQL Port must be a valid number!"
+- Empty hypervisor host → Error: "Hypervisor Host is required!"
 - Empty hypervisor password → Error: "Hypervisor Password is required!"
 
 **Test defaults:**
-- PostgreSQL user: defaults to "postgres"
-- PostgreSQL port: defaults to "5431"
-- Cluster name: defaults to "harvester"
-- Interval: defaults to "60"
+- PostgreSQL host: `postgres`
+- PostgreSQL user: `postgres`
+- PostgreSQL database: `hypervisor`
+- PostgreSQL schema: `fluentd`
+- Interval: `60`
+- Log retention days: `365`
+- Data retention days: `30`
 
 ### 4. Service Health Checks
 ```bash
 # PostgreSQL
-docker exec postgres pg_isready -U postgres
+docker exec hypervisor-postgres pg_isready -U postgres
 
-# Hypervisor Collector
-curl -f http://localhost:8080/health || echo "No health endpoint"
-
-# Fluentd
+# Fluentd HTTP input
 curl -f http://localhost:9880/api/plugins.json
 
-# Prometheus port-forward
-# Manual check: kubectl proxy running inside container
+# Prometheus port-forward (inside collector network namespace)
+# Check via collector logs — should show "Connected to Prometheus"
+docker compose -p hvcollector logs hypervisor-collector | grep -i prometheus
 ```
 
 ### 5. Data Collection Verification
@@ -88,26 +95,31 @@ curl -f http://localhost:9880/api/plugins.json
 2. Wait 60 seconds (default interval)
 3. Query PostgreSQL for collected data:
 ```sql
-SELECT * FROM fluentd.vm_metrics ORDER BY timestamp DESC LIMIT 10;
-SELECT * FROM fluentd.node_metrics ORDER BY timestamp DESC LIMIT 10;
+SELECT cluster, COUNT(*) FROM fluentd.hypervisor_inventory
+  GROUP BY cluster ORDER BY cluster;
+
+SELECT cluster, COUNT(*) FROM fluentd.hypervisor_node_usage
+  GROUP BY cluster ORDER BY cluster;
+
+SELECT COUNT(*) FROM fluentd.logs;
 ```
 
 **Expected:**
-- Non-empty result sets
+- Non-empty result sets after first collection cycle
 - Recent timestamps
-- Valid metric values
+- Valid metric values per cluster
 
 ### 6. Kubeconfig Validation
 **Test missing kubeconfig:**
 - Remove `kubeconfig.yaml`
 - Run installer
-- Confirmation screen shows: "❌ kubeconfig.yaml"
+- Confirmation screen shows: `✗ kubeconfig.yaml (missing)`
 - Cannot proceed until file is present
 
 **Test invalid kubeconfig:**
 - Create invalid YAML file
 - Collector service will fail to start
-- Check logs: `invalid kubeconfig` error
+- Check logs: `docker compose -p hvcollector logs hypervisor-collector`
 
 ## Build Quality
 
@@ -126,21 +138,23 @@ None currently documented.
 
 - [ ] Standard online installation works
 - [ ] Airgapped binary builds successfully
-- [ ] Airgapped installation works offline
-- [ ] Form validation catches errors
+- [ ] Airgapped installation works offline (images load from binary)
+- [ ] Form validation catches required field errors
+- [ ] Form defaults are sensible
+- [ ] .env file generated correctly
+- [ ] docker-compose.yaml scaffolded when missing
 - [ ] PostgreSQL connection succeeds
-- [ ] Collector retrieves metrics from Kubernetes
+- [ ] Collector retrieves metrics from Kubernetes/Harvester
 - [ ] Fluentd receives and stores logs in PostgreSQL
-- [ ] All services restart after host reboot
-- [ ] Update command works (if implemented)
+- [ ] All services restart after host reboot (restart: unless-stopped)
 
 ## Test Environments
 
 **Recommended:**
 - Ubuntu 22.04 LTS
 - Docker 24.0+
-- Kubernetes 1.24+ (for Harvester clusters)
+- Kubernetes 1.24+ / Harvester 1.x
 
 **Supported:**
 - Any Linux with Docker + Docker Compose v2
-- WSL2 (for development/testing)
+- WSL2 (for development/testing only)

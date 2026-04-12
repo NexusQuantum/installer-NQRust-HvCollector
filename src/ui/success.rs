@@ -49,12 +49,16 @@ pub fn render_success(frame: &mut Frame, view: &SuccessView<'_>) {
                 .add_modifier(Modifier::BOLD),
         )),
         Line::from(""),
-        Line::from("All services are now running. You can check status with:"),
+        Line::from("All services are now running. Check status with:"),
         Line::from(Span::styled(
-            "http://localhost:3000",
-            Style::default()
-                .fg(Color::Cyan)
-                .add_modifier(Modifier::UNDERLINED),
+            "  docker compose -p hvcollector ps",
+            Style::default().fg(Color::Cyan),
+        )),
+        Line::from(""),
+        Line::from("View collector logs:"),
+        Line::from(Span::styled(
+            "  docker compose -p hvcollector logs -f hypervisor-collector",
+            Style::default().fg(Color::Cyan),
         )),
         Line::from(""),
     ];
