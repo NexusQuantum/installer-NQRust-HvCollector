@@ -132,7 +132,7 @@ pub fn render_env_setup(frame: &mut Frame, view: &EnvSetupView<'_>) {
             .add_modifier(Modifier::BOLD),
     )));
     form_lines.push(Line::from(""));
-    for i in 9..13 {
+    for i in 9..12 {
         form_lines.push(render_field(i));
     }
     form_lines.push(Line::from(""));
