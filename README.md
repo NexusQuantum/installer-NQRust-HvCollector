@@ -22,15 +22,17 @@ This installer provides a guided setup for the HV Collector platform, which incl
 
 Download the latest airgapped binary from the [Releases](https://github.com/NexusQuantum/installer-NQRust-HvCollector/releases) page.
 
+The release artifact is named `nqrust-hvcollector-airgapped-installer-<version>-amd64` (e.g. `nqrust-hvcollector-airgapped-installer-0.1.29-amd64`). Only `linux/amd64` is currently published.
+
 ```bash
-# Verify checksum
-sha256sum -c nqrust-hvcollector-airgapped.sha256
+# Verify checksum (replace <version> with actual version)
+sha256sum -c nqrust-hvcollector-airgapped-installer-<version>-amd64.sha256
 
 # Make executable
-chmod +x nqrust-hvcollector-airgapped
+chmod +x nqrust-hvcollector-airgapped-installer-<version>-amd64
 
 # Place kubeconfig.yaml in the same directory, then run:
-./nqrust-hvcollector-airgapped
+./nqrust-hvcollector-airgapped-installer-<version>-amd64
 ```
 
 The airgapped binary includes all Docker images — no internet access required during installation.
@@ -47,11 +49,11 @@ cargo build --release
 ## Installation Steps
 
 1. **Prepare** `kubeconfig.yaml` in the same directory as the installer binary
-2. **Run** `./nqrust-hvcollector-airgapped`
+2. **Run** `./nqrust-hvcollector-airgapped-installer-<version>-amd64`
 3. **Configure** via TUI form:
    - PostgreSQL: host (`postgres`), user (`postgres`), password, port, database (`hypervisor`), schema (`fluentd`)
    - Hypervisor/SSH: host, user, password
-   - Collector: interval (default: 60s), Prometheus URL (optional), retention days
+   - Collector: Prometheus URL (optional), retention days
 4. **Proceed** — Installer starts all services via `docker compose up -d`
 
 ## Post-Installation

@@ -47,22 +47,24 @@ The airgapped installer is a **self-extracting single binary** (~400 MB) that co
    - Pull all 4 Docker images from registries
    - Save images to compressed tar.gz files
    - Bundle everything into a single payload
-   - Create self-extracting binary: `nqrust-hvcollector-airgapped`
+   - Create self-extracting binary: `nqrust-hvcollector-airgapped-installer-<version>-amd64`
+
+   The version is resolved from (in order): `VERSION` env var, nearest git tag, or `Cargo.toml`. Override explicitly with `VERSION=0.1.29 ./scripts/airgapped/build-single-binary.sh`.
 
 4. **Verify the build:**
    ```bash
    # Check file size (should be ~400 MB)
-   ls -lh nqrust-hvcollector-airgapped
+   ls -lh nqrust-hvcollector-airgapped-installer-*-amd64
 
    # Verify checksum
-   sha256sum -c nqrust-hvcollector-airgapped.sha256
+   sha256sum -c nqrust-hvcollector-airgapped-installer-<version>-amd64.sha256
    ```
 
 ### Build Output
 
 ```
-nqrust-hvcollector-airgapped         (~400 MB) - Self-extracting binary
-nqrust-hvcollector-airgapped.sha256  - Checksum file
+nqrust-hvcollector-airgapped-installer-<version>-amd64         (~400 MB) - Self-extracting binary
+nqrust-hvcollector-airgapped-installer-<version>-amd64.sha256  - Checksum file
 build/
 ├── images/                          - Individual image tar.gz files
 │   ├── hypervisor-collector.tar.gz

@@ -40,7 +40,7 @@ docker exec -it hypervisor-postgres psql -U postgres -d hypervisor
 ```
 
 **Expected output:**
-- `nqrust-hvcollector-airgapped` binary (~400 MB)
+- `nqrust-hvcollector-airgapped-installer-<version>-amd64` binary (~400 MB)
 - Contains all 4 Docker images embedded:
   - `postgres:15-alpine`
   - `ghcr.io/nexusquantum/hypervisor-collector:latest`
@@ -49,8 +49,8 @@ docker exec -it hypervisor-postgres psql -U postgres -d hypervisor
 
 **Install (target machine):**
 1. Transfer binary and `kubeconfig.yaml` to target machine
-2. `chmod +x nqrust-hvcollector-airgapped`
-3. `./nqrust-hvcollector-airgapped`
+2. `chmod +x nqrust-hvcollector-airgapped-installer-<version>-amd64`
+3. `./nqrust-hvcollector-airgapped-installer-<version>-amd64`
 4. Images auto-load from embedded payload, then TUI installer starts
 5. Complete TUI flow as in scenario 1
 
