@@ -21,7 +21,6 @@ pub struct FormData {
     pub(crate) hypervisor_password: String,
 
     // Collector settings (optional, has defaults)
-    pub(crate) interval_seconds: String,
     pub(crate) prometheus_url: String,
     pub(crate) log_retention_days: String,
     pub(crate) data_retention_days: String,
@@ -47,7 +46,6 @@ impl FormData {
             hypervisor_password: String::new(),
 
             // Collector defaults
-            interval_seconds: "60".to_string(),
             prometheus_url: "http://127.0.0.1:9090".to_string(),
             log_retention_days: "365".to_string(),
             data_retention_days: "30".to_string(),
@@ -85,12 +83,6 @@ impl FormData {
             return false;
         }
 
-        // Validate interval_seconds is numeric
-        if let Err(_) = self.interval_seconds.parse::<u32>() {
-            self.error_message = "Interval Seconds must be a valid number!".to_string();
-            return false;
-        }
-
         self.error_message.clear();
         true
     }
@@ -107,10 +99,9 @@ impl FormData {
                 6 => &mut self.hypervisor_host,
                 7 => &mut self.hypervisor_user,
                 8 => &mut self.hypervisor_password,
-                9 => &mut self.interval_seconds,
-                10 => &mut self.prometheus_url,
-                11 => &mut self.log_retention_days,
-                12 => &mut self.data_retention_days,
+                9 => &mut self.prometheus_url,
+                10 => &mut self.log_retention_days,
+                11 => &mut self.data_retention_days,
                 _ => &mut self.postgres_host,
             },
             _ => &mut self.postgres_host,
@@ -118,7 +109,7 @@ impl FormData {
     }
 
     pub fn get_total_fields(&self) -> usize {
-        13 // All fields
+        12 // All fields
     }
 
     pub fn get_field_label(&self, idx: usize) -> &str {
@@ -132,10 +123,9 @@ impl FormData {
             6 => "Hypervisor Host",
             7 => "Hypervisor User",
             8 => "Hypervisor Password",
-            9 => "Interval Seconds",
-            10 => "Prometheus URL (optional)",
-            11 => "Log Retention Days",
-            12 => "Data Retention Days",
+            9 => "Prometheus URL (optional)",
+            10 => "Log Retention Days",
+            11 => "Data Retention Days",
             _ => "Unknown",
         }
     }

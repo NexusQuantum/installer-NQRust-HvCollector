@@ -69,10 +69,9 @@ pub fn render_env_setup(frame: &mut Frame, view: &EnvSetupView<'_>) {
             6 => &data.hypervisor_host,
             7 => &data.hypervisor_user,
             8 => &data.hypervisor_password,
-            9 => &data.interval_seconds,
-            10 => &data.prometheus_url,
-            11 => &data.log_retention_days,
-            12 => &data.data_retention_days,
+            9 => &data.prometheus_url,
+            10 => &data.log_retention_days,
+            11 => &data.data_retention_days,
             _ => &data.postgres_host,
         };
 
